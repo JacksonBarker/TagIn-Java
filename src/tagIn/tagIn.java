@@ -14,12 +14,16 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class tagIn {
 	
 	public static String inpt;
-	public static String wbLoc = "W:\\tagIn\\demosheet.xlsx";
+	public static String wbLoc = "C:/eclipse/TagIn-Java/demosheet.xlsx";
 	
 	public static void main(String[] args) {
+		System.out.println("TagIn Java");
+		System.out.println("Version: in developement");
+		System.out.println("Ready for command");
 		Scanner sc = new Scanner(System.in);
 		inpt = sc.nextLine();
 		if (inpt.contains("newuser")) {
+			System.out.println("Send 'cancel' at any time to cancel user creation");
 			System.out.println("What is the users name?");
 			inpt = sc.nextLine();
 			if (inpt.contains("cancel") != true) {
@@ -28,43 +32,34 @@ public class tagIn {
 				inpt = sc.nextLine();
 				if (inpt.contains("cancel") != true) {
 					String newuuid = inpt;
-					CreateUser(newname, newuuid);
+					System.out.println("WARNING PLEASE CHECK THAT THE ROW DOESN'T CONTAIN ANOTHER USER AND IS DIRECTLY BELOW THE PREVIOUS USER IN THE USER LIST SPREADSHEET");
+					System.out.println("What row should this new user occupy?");
+					inpt = sc.nextLine();
+					if (inpt.contains("cancel") != true) {
+						int newcell = Integer.parseInt(inpt);
+					CreateUser(newname, newuuid, newcell);
+					}
 				}
 			}
 		}
 	}
 
-	public static void CreateUser(String cName, String cUUID) {
+	public static void CreateUser(String cName, String cUUID, int cCell) {
 		Workbook wb = null;
-		int cr = 0;
 		try {
 			FileInputStream fis = new FileInputStream(wbLoc);
 			wb = new XSSFWorkbook(fis);
-		} catch (FileNotFoundException e2) {
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e2) {
 			e2.printStackTrace();
-		} catch (IOException e3) {
-			e3.printStackTrace();
 		}
 		Sheet sheet = wb.getSheetAt(0);
-		boolean created = false;
-		while (created = false) {
-			try {
-				Row row = sheet.getRow(cr);
-				Cell cell = row.getCell(0);
-				cr++;
-				System.out.println(cr);
-			} catch (NullPointerException e4) {
-				System.out.println("hello");
-				Row row = sheet.getRow(cr);
-				Cell cell = row.createCell(0);
-			    cell.setCellValue(cName);
-			    cell = row.createCell(1);
-			    cell.setCellValue(cUUID);
-			    cell = row.createCell(2);
-			    cell.setCellValue("out");
-			    created = true;
-			}
-		}
+		Row row = sheet.createRow(cCell-1);
+		Cell cell = row.createCell(0);
+		cell.setCellValue(cUUID);
+		cell = row.createCell(1);
+		cell.setCellValue(cName);
+		System.out.println("The program has made it to this point");
 	}
-
 }
