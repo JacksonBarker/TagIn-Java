@@ -18,7 +18,7 @@ public class tagIn {
 	
 	public static void main(String[] args) {
 		System.out.println("TagIn Java");
-		System.out.println("Version: in developement");
+		System.out.println("Version: in development");
 		System.out.println("Ready for command");
 		Scanner sc = new Scanner(System.in);
 		inpt = sc.nextLine();
