@@ -13,11 +13,11 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class tagIn {
-	
+
 	public static String inpt;
 	public static String wbLoc = "C:/eclipse/TagIn-Java/demosheet.xlsx";
 	public static Boolean stop = false;
-	
+
 	public static void main(String[] args) {
 		System.out.println("TagIn Java");
 		System.out.println("Version: in development");
@@ -44,10 +44,28 @@ public class tagIn {
 						}
 					}
 				}
-			}
-			if (inpt.contains("stop")) {
+			} else if (inpt.contains("find")) {
+				System.out.println("What are you using to find the user's information? (Name or UUID)");
+				System.out.println("Send 'cancel' at any time to cancel user search.");
+				inpt = sc.nextLine();
+				if (!inpt.contains("cancel")) {
+					if (inpt.toLowerCase().contains("uuid")) {
+						System.out.println("What is the user's UUID?");
+						inpt = sc.nextLine();
+						if (!inpt.contains("cancel")) {
+							FindUser(0, inpt);
+						}
+					} else if (inpt.toLowerCase().contains("name")) {
+						System.out.println("What is the user's name?");
+						inpt = sc.nextLine();
+						if (!inpt.contains("cancel"))
+							FindUser(1, inpt);
+					}
+				}
+			} else if (inpt.contains("stop")) {
 				stop = true;
 			}
+
 		}
 	}
 
@@ -77,5 +95,41 @@ public class tagIn {
 		} else {
 			System.out.println("The user list spreadsheet file cannot be null.");
 		}
+	}
+
+	public static void FindUser(int method, String info) {
+		Boolean Found = false;
+		Boolean EndOfList = false;
+		Workbook wb = null;
+		try {
+			FileInputStream fis = new FileInputStream(wbLoc);
+			wb = new XSSFWorkbook(fis);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		if (wb != null) {
+			Sheet sheet = wb.getSheetAt(0);
+			for (int i = 0; !Found; i++) {
+				Row row = sheet.getRow(i);
+				Cell cell = row.getCell(method);
+				if (info.equals(cell.getStringCellValue())) {
+					cell = row.getCell(0);
+					System.out.println("The user's UUID is: " + cell.getStringCellValue());
+					cell = row.getCell(1);
+					System.out.println("The user's name is: " + cell.getStringCellValue());
+					System.out.println("The user's row is: " + (i+1));
+					Found = true;
+				} else if (cell.getStringCellValue() == "") {
+					EndOfList = true;
+					Found = true;
+				}
+			}
+		} else {
+			System.out.println("The user list spreadsheet file cannot be null.");
+		}
+		if (EndOfList) {
+			System.out.println("A user matching the information provided was not found");
+		}
+
 	}
 }
