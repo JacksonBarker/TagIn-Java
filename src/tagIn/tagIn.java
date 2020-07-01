@@ -1,11 +1,10 @@
 package tagIn;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
-
+import java.util.UUID;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,17 +30,12 @@ public class tagIn {
 				inpt = sc.nextLine();
 				if (!inpt.contains("cancel")) {
 					String newname = inpt;
-					System.out.println("What is the users UUID?");
+					System.out.println("WARNING PLEASE CHECK THAT THE ROW DOESN'T CONTAIN ANOTHER USER AND IS DIRECTLY BELOW THE PREVIOUS USER IN THE USER LIST SPREADSHEET!");
+					System.out.println("What row should this new user occupy? (Must be 1 or greater)");
 					inpt = sc.nextLine();
-					if (!inpt.contains("cancel")) {
-						String newuuid = inpt;
-						System.out.println("WARNING PLEASE CHECK THAT THE ROW DOESN'T CONTAIN ANOTHER USER AND IS DIRECTLY BELOW THE PREVIOUS USER IN THE USER LIST SPREADSHEET!");
-						System.out.println("What row should this new user occupy? (Must be 1 or greater)");
-						inpt = sc.nextLine();
-						if (!inpt.contains("cancel") && Integer.parseInt(inpt) > 0) {
-							int newcell = Integer.parseInt(inpt);
-							CreateUser(newname, newuuid, newcell);
-						}
+					if (!inpt.contains("cancel") && Integer.parseInt(inpt) > 0) {
+						int newcell = Integer.parseInt(inpt);
+						CreateUser(newname, newcell);
 					}
 				}
 			} else if (inpt.contains("find")) {
@@ -69,7 +63,7 @@ public class tagIn {
 		}
 	}
 
-	public static void CreateUser(String cName, String cUUID, int cCell) {
+	public static void CreateUser(String cName, int cCell) {
 		Workbook wb = null;
 		try {
 			FileInputStream fis = new FileInputStream(wbLoc);
@@ -81,7 +75,8 @@ public class tagIn {
 			Sheet sheet = wb.getSheetAt(0);
 			Row row = sheet.createRow(cCell - 1);
 			Cell cell = row.createCell(0);
-			cell.setCellValue(cUUID);
+			UUID uuid = UUID.randomUUID();
+			cell.setCellValue(uuid.toString());
 			cell = row.createCell(1);
 			cell.setCellValue(cName);
 			try {
@@ -91,7 +86,8 @@ public class tagIn {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println("The user was added successfully!");
+			System.out.println("The user was generated with the UUID: " + uuid);
+
 		} else {
 			System.out.println("The user list spreadsheet file cannot be null.");
 		}
