@@ -3,6 +3,9 @@ package tagIn;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.UUID;
 import org.apache.poi.ss.usermodel.Cell;
@@ -16,6 +19,7 @@ public class tagIn {
 	public static String inpt;
 	public static String wbLoc = "C:/eclipse/TagIn-Java/demosheet.xlsx";
 	public static Boolean stop = false;
+	public static DateFormat dateFormat = new SimpleDateFormat("hh:mm aa");
 
 	public static void main(String[] args) {
 		System.out.println("TagIn Java");
@@ -79,6 +83,13 @@ public class tagIn {
 			cell.setCellValue(uuid.toString());
 			cell = row.createCell(1);
 			cell.setCellValue(cName);
+			cell = row.createCell(2);
+			cell.setCellType(CellType.BOOLEAN);
+			cell.setCellValue(false);
+			cell = row.createCell(3);
+			dateFormat = new SimpleDateFormat("hh:mm aa");
+			cell.setCellValue(dateFormat.format(new Date()).toString());
+
 			try {
 				FileOutputStream out = new FileOutputStream(wbLoc);
 				wb.write(out);
@@ -114,6 +125,11 @@ public class tagIn {
 					cell = row.getCell(1);
 					System.out.println("The user's name is: " + cell.getStringCellValue());
 					System.out.println("The user's row is: " + (i+1));
+					cell = row.getCell(2);
+					System.out.println("Is user signed in?: " + cell.getBooleanCellValue());
+					cell = row.getCell(3);
+					System.out.println("Last user sign-in/out: " + cell.getStringCellValue());
+
 					Found = true;
 				} else if (cell.getStringCellValue() == "") {
 					EndOfList = true;
