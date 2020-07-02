@@ -128,7 +128,7 @@ public class tagIn {
 					cell = row.getCell(2);
 					System.out.println("Is user signed in?: " + cell.getBooleanCellValue());
 					cell = row.getCell(3);
-					System.out.println("Last user sign-in/out: " + cell.getStringCellValue());
+					System.out.println("Last user signed-in/out: " + cell.getStringCellValue());
 
 					Found = true;
 				} else if (cell.getStringCellValue() == "") {
