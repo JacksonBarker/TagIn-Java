@@ -3,9 +3,6 @@ package tagIn;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Scanner;
 import java.util.UUID;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,8 +15,7 @@ public class tagIn {
 
 	public static String inpt;
 	public static String wbLoc = "C:/eclipse/TagIn-Java/demosheet.xlsx";
-	public static Boolean stop = false;
-	public static DateFormat dateFormat = new SimpleDateFormat("hh:mm aa");
+	public static boolean stop = false;
 
 	public static void main(String[] args) {
 		System.out.println("TagIn Java");
@@ -86,9 +82,6 @@ public class tagIn {
 			cell = row.createCell(2);
 			cell.setCellType(CellType.BOOLEAN);
 			cell.setCellValue(false);
-			cell = row.createCell(3);
-			dateFormat = new SimpleDateFormat("hh:mm aa");
-			cell.setCellValue(dateFormat.format(new Date()).toString());
 
 			try {
 				FileOutputStream out = new FileOutputStream(wbLoc);
@@ -105,8 +98,8 @@ public class tagIn {
 	}
 
 	public static void FindUser(int method, String info) {
-		Boolean Found = false;
-		Boolean EndOfList = false;
+		boolean Found = false;
+		boolean EndOfList = false;
 		Workbook wb = null;
 		try {
 			FileInputStream fis = new FileInputStream(wbLoc);
@@ -118,30 +111,30 @@ public class tagIn {
 			Sheet sheet = wb.getSheetAt(0);
 			for (int i = 0; !Found; i++) {
 				Row row = sheet.getRow(i);
-				Cell cell = row.getCell(method);
-				if (info.equals(cell.getStringCellValue())) {
-					cell = row.getCell(0);
-					System.out.println("The user's UUID is: " + cell.getStringCellValue());
-					cell = row.getCell(1);
-					System.out.println("The user's name is: " + cell.getStringCellValue());
-					System.out.println("The user's row is: " + (i+1));
-					cell = row.getCell(2);
-					System.out.println("Is user signed in?: " + cell.getBooleanCellValue());
-					cell = row.getCell(3);
-					System.out.println("Last user signed-in/out: " + cell.getStringCellValue());
+				try {
+					Cell cell = row.getCell(method);
+					if (info.equals(cell.getStringCellValue())) {
+						cell = row.getCell(0);
+						System.out.println("The user's UUID is: " + cell.getStringCellValue());
+						cell = row.getCell(1);
+						System.out.println("The user's name is: " + cell.getStringCellValue());
+						System.out.println("The user's row is: " + (i + 1));
+						cell = row.getCell(2);
+						System.out.println("Is user signed in?: " + cell.getBooleanCellValue());
 
+						Found = true;
+					}
+				} catch (NullPointerException e2) {
 					Found = true;
-				} else if (cell.getStringCellValue() == "") {
 					EndOfList = true;
-					Found = true;
 				}
 			}
 		} else {
 			System.out.println("The user list spreadsheet file cannot be null.");
 		}
-		if (EndOfList) {
-			System.out.println("A user matching the information provided was not found");
-		}
+			if (EndOfList) {
+				System.out.println("A user matching the information provided was not found");
+			}
 
+		}
 	}
-}
