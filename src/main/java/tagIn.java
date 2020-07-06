@@ -1,13 +1,33 @@
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Scanner;
-import java.util.UUID;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.security.GeneralSecurityException;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.ValueRange;
 
 public class tagIn {
 
@@ -15,7 +35,30 @@ public class tagIn {
 	public static String wbLoc = "C:/TagIn-Java/src/main/resources/userlist.xlsx";
 	public static boolean stop = false;
 
-	public static void main(String[] args) {
+	private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
+	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+	private static final String TOKENS_DIRECTORY_PATH = "tokens";
+
+	private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
+	private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
+
+	private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+		InputStream in = tagIn.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+		if (in == null) {
+			throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+		}
+		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+
+		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+				HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+				.setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+				.setAccessType("offline")
+				.build();
+		LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+		return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+	}
+
+	public static void main(String[] args) throws IOException, GeneralSecurityException {
 		System.out.println("TagIn Java");
 		System.out.println("Version: in development");
 		System.out.println("Ready for command.");
@@ -53,6 +96,13 @@ public class tagIn {
 						if (!inpt.contains("cancel"))
 							FindUser(1, inpt);
 					}
+				}
+			} else if (inpt.contains("newday")) {
+				System.out.println("Are you sure you would like to start a new day?");
+				System.out.println("Type 'confirm' to start new day.");
+				inpt = sc.nextLine();
+				if (inpt.contains("confirm")) {
+					NewDay();
 				}
 			} else if (inpt.contains("stop")) {
 				stop = true;
@@ -134,5 +184,30 @@ public class tagIn {
 				System.out.println("A user matching the information provided was not found");
 			}
 
+		}
+
+		public static void NewDay() throws IOException, GeneralSecurityException {
+			final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+			final String spreadsheetId = "1WxijUbdukzbkBVXbWcBUzH5aOo-Cy9mX6pixO710EMU";
+			final String range = "A4:A";
+
+			DateFormat dateFormat = new SimpleDateFormat("MM/dd");
+			Date date = new Date();
+			String dateString = dateFormat.format(date);
+
+			Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+					.setApplicationName(APPLICATION_NAME)
+					.build();
+			ValueRange response = service.spreadsheets().values()
+					.get(spreadsheetId, range)
+					.execute();
+			List<List<Object>> values = response.getValues();
+			if (values == null || values.isEmpty()) {
+				System.out.println("No data found.");
+			} else {
+				for (List row : values) {
+					System.out.printf("%s\n", row.get(0));
+				}
+			}
 		}
 	}
